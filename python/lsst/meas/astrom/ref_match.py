@@ -181,14 +181,20 @@ class RefMatchTask(pipeBase.Task):
         - wcs: WCS (an lsst.afw.geom.Wcs)
         - calib calibration (an lsst.afw.image.Calib), or None if unknown
         - filterName: name of filter, or None if unknown
+        - epoch: TAI MJD of exposure, or None
         """
         exposureInfo = exposure.getInfo()
         filterName = exposureInfo.getFilter().getName() or None
         if filterName == "_unknown_":
             filterName = None
+        epoch = None
+        if exposure.getInfo().hasVisitInfo():
+            epoch = exposure.getInfo().getVisitInfo().getDate().get()
+
         return pipeBase.Struct(
             bbox=exposure.getBBox(),
             wcs=exposureInfo.getWcs(),
             calib=exposureInfo.getCalib() if exposureInfo.hasCalib() else None,
             filterName=filterName,
+            epoch=epoch,
         )
